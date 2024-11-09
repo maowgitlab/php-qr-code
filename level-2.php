@@ -164,7 +164,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <h3>Result:</h3>
                         <?php if (isset($_GET['success-image'])) : ?>
                             <?php
-                                // Ambil dan sanitasi URL dari parameter GET
+                                // Get and sanitize URL from GET parameter
                                 $imageUrl = htmlspecialchars($_GET['success-image'], ENT_QUOTES, 'UTF-8');
                                 $imagePath = htmlspecialchars($_GET['image'], ENT_QUOTES, 'UTF-8');
                                 $clearUrl = htmlspecialchars($_SERVER['PHP_SELF'] . '?clearImage=true&image=' . urlencode($imagePath) . '&success-image=' . urlencode($imageUrl), ENT_QUOTES, 'UTF-8');
@@ -176,7 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                         <?php elseif (isset($_GET['success-text'])) : ?>
                             <?php
-                                // Ambil dan sanitasi URL dari parameter GET untuk text-based QR Code
+                                // Get and sanitize URL from GET parameter for text-based QR Code
                                 $imageUrl = htmlspecialchars($_GET['success-text'], ENT_QUOTES, 'UTF-8');
                                 $clearUrl = htmlspecialchars($_SERVER['PHP_SELF'] . '?clearText=true&success-text=' . urlencode($imageUrl), ENT_QUOTES, 'UTF-8');
                             ?>
