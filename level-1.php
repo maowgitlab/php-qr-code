@@ -1,6 +1,7 @@
 <?php 
     include 'phpqrcode/qrlib.php';
 
+    // Level 1
     $fileLocation = 'generated/qrcode.png';
     $content = 'Hello World';
     $errorCorrectionLevel = 'L';
