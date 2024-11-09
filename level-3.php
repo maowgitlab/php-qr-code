@@ -121,7 +121,7 @@ if (isset($_POST['submitText'])) {
                         <?php if (isset($_GET['success-image'])) : ?>
                             <img src="<?= $_GET['success-image'] ?>" alt="QR Code" class="my-2">
                             <div class="btn-group d-block">
-                                <a href="<?= $_GET['image'] ?>" class="btn btn-sm btn-primary" download>Download</a>
+                                <a href="<?= $_GET['success-image'] ?>" class="btn btn-sm btn-primary" download>Download</a>
                                 <a href="<?= $_SERVER['PHP_SELF'] ?>?clearImage=true&image=<?= $_GET['image'] ?>&success-image=<?= $_GET['success-image'] ?>" class="btn btn-sm btn-danger">Clear</a>
                             </div>
                         <?php elseif (isset($_GET['success-text'])) : ?>
