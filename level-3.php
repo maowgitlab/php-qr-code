@@ -22,7 +22,7 @@ if (isset($_POST['submitImage'])) {
     }
     $data = 'http://' . $_SERVER['HTTP_HOST'] . '/' . $pathImage;
 
-    $fileLocation = 'generated/qrcode-image.png';
+    $fileLocation = 'generated/' . time() . '.png';
     $errorCorrectionLevel = $_POST['errorCorrectionLevel'];
     $matrixPointSize = $_POST['matrixPointSize'];
 
@@ -32,7 +32,7 @@ if (isset($_POST['submitImage'])) {
 }
 
 if (isset($_POST['submitText'])) {
-    $fileLocation = 'generated/qrcode.png';
+    $fileLocation = 'generated/' . time() . '.png';
     $content = $_POST['text'];
     $errorCorrectionLevel = $_POST['errorCorrectionLevel'];
     $matrixPointSize = $_POST['matrixPointSize'];
@@ -116,17 +116,18 @@ if (isset($_POST['submitText'])) {
                 </div>
 
                 <div class="row">
-                    <div class="col">
+                    <hr>
+                    <div class="col text-center">
                         <h3>Result:</h3>
                         <?php if (isset($_GET['success-image'])) : ?>
                             <img src="<?= $_GET['success-image'] ?>" alt="QR Code" class="my-2">
-                            <div class="btn-group d-block">
+                            <div class="btn-group">
                                 <a href="<?= $_GET['success-image'] ?>" class="btn btn-sm btn-primary" download>Download</a>
                                 <a href="<?= $_SERVER['PHP_SELF'] ?>?clearImage=true&image=<?= $_GET['image'] ?>&success-image=<?= $_GET['success-image'] ?>" class="btn btn-sm btn-danger">Clear</a>
                             </div>
                         <?php elseif (isset($_GET['success-text'])) : ?>
                             <img src="<?= $_GET['success-text'] ?>" alt="QR Code" class="my-2 ">
-                            <div class="btn-group d-block">
+                            <div class="btn-group">
                                 <a href="<?= $_GET['success-text'] ?>" class="btn btn-sm btn-primary" download>Download</a>
                                 <a href="<?= $_SERVER['PHP_SELF'] ?>?clearText=true&success-text=<?= $_GET['success-text'] ?>" class="btn btn-sm btn-danger">Clear</a>
                             </div>
