@@ -102,6 +102,71 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="row">
             <div class="col-md-8 mx-auto my-5">
                 <h1>Multiple QR Code Generator</h1>
+                <div class="card my-3">
+                    <div class="card-header">
+                        Read Notes
+                    </div>
+                    <div class="card-body">
+                        <div class="accordion accordion-flush" id="accordionFlushExample">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="flush-headingOne">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="false" aria-controls="flush-collapseOne">
+                                        About Error Correction Level
+                                    </button>
+                                </h2>
+                                <div id="flush-collapseOne" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
+                                    <div class="accordion-body">
+                                        <p class="lead">Error correction in QR codes allows data to be restored even if part of the code is damaged.</p>
+                                        <p>There are four levels of error correction in QR codes:</p>
+                                        <ul class="list-group">
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <strong>L (Low)</strong>
+                                                <span class="badge bg-primary">7% damage tolerance</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <strong>M (Medium)</strong>
+                                                <span class="badge bg-secondary">15% damage tolerance</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <strong>Q (Quartile)</strong>
+                                                <span class="badge bg-warning">25% damage tolerance</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <strong>H (High)</strong>
+                                                <span class="badge bg-danger">30% damage tolerance</span>
+                                            </li>
+                                        </ul>
+                                        <p class="mt-3">Higher error correction levels provide more resilience, but store less data.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="flush-headingTwo">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseTwo" aria-expanded="false" aria-controls="flush-collapseTwo">
+                                        About Matrix Point Size (Module Size)
+                                    </button>
+                                </h2>
+                                <div id="flush-collapseTwo" class="accordion-collapse collapse" aria-labelledby="flush-headingTwo" data-bs-parent="#accordionFlushExample">
+                                    <div class="accordion-body">
+                                        <p class="lead">The matrix point size defines the size of each module (the black and white squares) in the QR code.</p>
+                                        <p>The size of the modules influences the resolution of the QR code:</p>
+                                        <ul class="list-group">
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <strong>Small Matrix Point Size</strong>
+                                                <span class="badge bg-info">Higher data capacity</span>
+                                            </li>
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <strong>Large Matrix Point Size</strong>
+                                                <span class="badge bg-success">Easier to scan, but less data</span>
+                                            </li>
+                                        </ul>
+                                        <p class="mt-3">Smaller modules store more data, but require higher resolution for scanning, while larger modules are easier to read but store less information.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <ul class="nav nav-tabs" id="myTab" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="text-tab" data-bs-toggle="tab" data-bs-target="#text-tab-pane" type="button" role="tab" aria-controls="text-tab-pane" aria-selected="true">Text to QRCode</button>
@@ -127,7 +192,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label for="matrixPointSize" class="form-label">Matrix Point Size</label>
+                                <label for="matrixPointSize" class="form-label">Matrix Point Size <sup class="text-danger">( max 10 | default 4 )</sup></label>
                                 <input type="number" class="form-control" name="matrixPointSize" id="matrixPointSize" min="1" max="10" value="4" required>
                             </div>
                             <button type="submit" name="submitText" class="btn btn-primary">Generate</button>
@@ -164,10 +229,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <h3>Result:</h3>
                         <?php if (isset($_GET['success-image'])) : ?>
                             <?php
-                                // Get and sanitize URL from GET parameter
-                                $imageUrl = htmlspecialchars($_GET['success-image'], ENT_QUOTES, 'UTF-8');
-                                $imagePath = htmlspecialchars($_GET['image'], ENT_QUOTES, 'UTF-8');
-                                $clearUrl = htmlspecialchars($_SERVER['PHP_SELF'] . '?clearImage=true&image=' . urlencode($imagePath) . '&success-image=' . urlencode($imageUrl), ENT_QUOTES, 'UTF-8');
+                            // Get and sanitize URL from GET parameter
+                            $imageUrl = htmlspecialchars($_GET['success-image'], ENT_QUOTES, 'UTF-8');
+                            $imagePath = htmlspecialchars($_GET['image'], ENT_QUOTES, 'UTF-8');
+                            $clearUrl = htmlspecialchars($_SERVER['PHP_SELF'] . '?clearImage=true&image=' . urlencode($imagePath) . '&success-image=' . urlencode($imageUrl), ENT_QUOTES, 'UTF-8');
                             ?>
                             <img src="<?= $imageUrl ?>" alt="QR Code" class="my-2">
                             <div class="btn-group">
@@ -176,9 +241,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </div>
                         <?php elseif (isset($_GET['success-text'])) : ?>
                             <?php
-                                // Get and sanitize URL from GET parameter for text-based QR Code
-                                $imageUrl = htmlspecialchars($_GET['success-text'], ENT_QUOTES, 'UTF-8');
-                                $clearUrl = htmlspecialchars($_SERVER['PHP_SELF'] . '?clearText=true&success-text=' . urlencode($imageUrl), ENT_QUOTES, 'UTF-8');
+                            // Get and sanitize URL from GET parameter for text-based QR Code
+                            $imageUrl = htmlspecialchars($_GET['success-text'], ENT_QUOTES, 'UTF-8');
+                            $clearUrl = htmlspecialchars($_SERVER['PHP_SELF'] . '?clearText=true&success-text=' . urlencode($imageUrl), ENT_QUOTES, 'UTF-8');
                             ?>
                             <img src="<?= $imageUrl ?>" alt="QR Code" class="my-2">
                             <div class="btn-group">
