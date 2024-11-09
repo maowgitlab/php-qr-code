@@ -215,7 +215,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </select>
                             </div>
                             <div class="mb-3">
-                                <label for="matrixPointSize" class="form-label">Matrix Point Size</label>
+                                <label for="matrixPointSize" class="form-label">Matrix Point Size <sup class="text-danger">( max 10 | default 4 )</sup></label>
                                 <input type="number" class="form-control" name="matrixPointSize" id="matrixPointSize" min="1" max="10" value="4" required>
                             </div>
                             <button type="submit" name="submitImage" class="btn btn-primary">Generate</button>
