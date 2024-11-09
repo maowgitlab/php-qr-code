@@ -1,47 +1,90 @@
 <?php
 include 'phpqrcode/qrlib.php';
 
-if (isset($_GET['clearImage']) && isset($_GET['image']) && isset($_GET['success-image'])) {
-    unlink($_GET['image']);
-    unlink($_GET['success-image']);
-    echo "<meta http-equiv='refresh' content='0; url=http://localhost:8000/level-3.php'>";
-}
+// Define paths as constants for better maintainability
+define('IMAGE_UPLOAD_DIR', 'image/');
+define('GENERATED_QR_DIR', 'generated/');
 
-if (isset($_GET['clearText']) && isset($_GET['success-text'])) {
-    unlink($_GET['success-text']);
-    echo "<meta http-equiv='refresh' content='0; url=http://localhost:8000/level-3.php'>";
-}
-
-if (isset($_POST['submitImage'])) {
-    $image = $_FILES['image']['tmp_name'];
-    $imageName = $_FILES['image']['name'];
+// Function to handle image uploads
+function uploadImage($image)
+{
+    $imageName = $image['name'];
+    $imageTmpName = $image['tmp_name'];
     $imageExtension = pathinfo($imageName, PATHINFO_EXTENSION);
-    $pathImage = 'image/' . time() . '.' . strtolower($imageExtension);
-    if (!move_uploaded_file($image, $pathImage)) {
-        die('Failed to upload image');
+
+    // Validate image extension (allow only certain file types)
+    $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+    if (!in_array(strtolower($imageExtension), $allowedExtensions)) {
+        die('Invalid file type. Only JPG, JPEG, PNG, and GIF are allowed.');
     }
-    $data = 'http://' . $_SERVER['HTTP_HOST'] . '/' . $pathImage;
 
-    $fileLocation = 'generated/' . time() . '.png';
-    $errorCorrectionLevel = $_POST['errorCorrectionLevel'];
-    $matrixPointSize = $_POST['matrixPointSize'];
+    $pathImage = IMAGE_UPLOAD_DIR . time() . '.' . strtolower($imageExtension);
+    if (!move_uploaded_file($imageTmpName, $pathImage)) {
+        die('Failed to upload image.');
+    }
 
+    return $pathImage;
+}
+
+// Function to generate QR code
+function generateQRCode($data, $fileLocation, $errorCorrectionLevel, $matrixPointSize)
+{
     QRcode::png($data, $fileLocation, $errorCorrectionLevel, $matrixPointSize);
-    header('Location: level-3.php?success-image=' . $fileLocation . '&image=' . $pathImage);
+}
+
+// Clear images or text files based on query parameters
+function clearGeneratedFiles($imagePath = null, $textFilePath = null)
+{
+    if ($imagePath && file_exists($imagePath)) {
+        unlink($imagePath);
+    }
+    if ($textFilePath && file_exists($textFilePath)) {
+        unlink($textFilePath);
+    }
+    echo "<meta http-equiv='refresh' content='0; url=http://localhost:8000/level-2.php'>";
     exit;
 }
 
-if (isset($_POST['submitText'])) {
-    $fileLocation = 'generated/' . time() . '.png';
-    $content = $_POST['text'];
-    $errorCorrectionLevel = $_POST['errorCorrectionLevel'];
-    $matrixPointSize = $_POST['matrixPointSize'];
+// Handle requests based on URL parameters and form submission
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    if (isset($_GET['clearImage'], $_GET['image'], $_GET['success-image'])) {
+        clearGeneratedFiles($_GET['image'], $_GET['success-image']);
+    }
 
-    QRcode::png($content, $fileLocation, $errorCorrectionLevel, $matrixPointSize);
-    header('Location: level-3.php?success-text=' . $fileLocation);
-    exit;
+    if (isset($_GET['clearText'], $_GET['success-text'])) {
+        clearGeneratedFiles(null, $_GET['success-text']);
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['submitImage']) && isset($_FILES['image'])) {
+        // Upload image and generate QR code
+        $imagePath = uploadImage($_FILES['image']);
+        $data = 'http://' . $_SERVER['HTTP_HOST'] . '/' . $imagePath;
+
+        $fileLocation = GENERATED_QR_DIR . time() . '.png';
+        $errorCorrectionLevel = $_POST['errorCorrectionLevel'];
+        $matrixPointSize = $_POST['matrixPointSize'];
+
+        generateQRCode($data, $fileLocation, $errorCorrectionLevel, $matrixPointSize);
+        header('Location: level-2.php?success-image=' . $fileLocation . '&image=' . $imagePath);
+        exit;
+    }
+
+    if (isset($_POST['submitText'], $_POST['text'])) {
+        // Generate QR code from text
+        $content = $_POST['text'];
+        $fileLocation = GENERATED_QR_DIR . time() . '.png';
+        $errorCorrectionLevel = $_POST['errorCorrectionLevel'];
+        $matrixPointSize = $_POST['matrixPointSize'];
+
+        generateQRCode($content, $fileLocation, $errorCorrectionLevel, $matrixPointSize);
+        header('Location: level-2.php?success-text=' . $fileLocation);
+        exit;
+    }
 }
 ?>
+
 
 <!doctype html>
 <html lang="en">
@@ -120,19 +163,31 @@ if (isset($_POST['submitText'])) {
                     <div class="col text-center">
                         <h3>Result:</h3>
                         <?php if (isset($_GET['success-image'])) : ?>
-                            <img src="<?= $_GET['success-image'] ?>" alt="QR Code" class="my-2">
+                            <?php
+                                // Ambil dan sanitasi URL dari parameter GET
+                                $imageUrl = htmlspecialchars($_GET['success-image'], ENT_QUOTES, 'UTF-8');
+                                $imagePath = htmlspecialchars($_GET['image'], ENT_QUOTES, 'UTF-8');
+                                $clearUrl = htmlspecialchars($_SERVER['PHP_SELF'] . '?clearImage=true&image=' . urlencode($imagePath) . '&success-image=' . urlencode($imageUrl), ENT_QUOTES, 'UTF-8');
+                            ?>
+                            <img src="<?= $imageUrl ?>" alt="QR Code" class="my-2">
                             <div class="btn-group">
-                                <a href="<?= $_GET['success-image'] ?>" class="btn btn-sm btn-primary" download>Download</a>
-                                <a href="<?= $_SERVER['PHP_SELF'] ?>?clearImage=true&image=<?= $_GET['image'] ?>&success-image=<?= $_GET['success-image'] ?>" class="btn btn-sm btn-danger">Clear</a>
+                                <a href="<?= $imageUrl ?>" class="btn btn-sm btn-primary" download>Download</a>
+                                <a href="<?= $clearUrl ?>" class="btn btn-sm btn-danger">Clear</a>
                             </div>
                         <?php elseif (isset($_GET['success-text'])) : ?>
-                            <img src="<?= $_GET['success-text'] ?>" alt="QR Code" class="my-2 ">
+                            <?php
+                                // Ambil dan sanitasi URL dari parameter GET untuk text-based QR Code
+                                $imageUrl = htmlspecialchars($_GET['success-text'], ENT_QUOTES, 'UTF-8');
+                                $clearUrl = htmlspecialchars($_SERVER['PHP_SELF'] . '?clearText=true&success-text=' . urlencode($imageUrl), ENT_QUOTES, 'UTF-8');
+                            ?>
+                            <img src="<?= $imageUrl ?>" alt="QR Code" class="my-2">
                             <div class="btn-group">
-                                <a href="<?= $_GET['success-text'] ?>" class="btn btn-sm btn-primary" download>Download</a>
-                                <a href="<?= $_SERVER['PHP_SELF'] ?>?clearText=true&success-text=<?= $_GET['success-text'] ?>" class="btn btn-sm btn-danger">Clear</a>
+                                <a href="<?= $imageUrl ?>" class="btn btn-sm btn-primary" download>Download</a>
+                                <a href="<?= $clearUrl ?>" class="btn btn-sm btn-danger">Clear</a>
                             </div>
                         <?php endif; ?>
                     </div>
+
                 </div>
             </div>
         </div>
